@@ -1,0 +1,94 @@
+{
+    "status":"success",
+
+    "result":{
+      "userInfo": {
+        "currentPage": 1,
+        "pageSize": 20,
+        "userCode": "admin",
+        "userName": "晓玲",
+        "passWord": null,
+        "createTime": 1542124800000,
+        "updateTime": null,
+        "updater": "xiaoling",
+        "flag": "1",
+        "oldPassword": "23b431acfeb41e15d466d75de822307c"
+      },
+      "menu": [{
+        "id": "L01",
+        "pid": null,
+        "name": "账户信息查询",
+        "url": "/accountManage",
+        "open": false,
+        "className": "firstA",
+        "isActive": false,
+        "iconLS": "/static/img/shape-1.png",
+        "nodes": []
+      },{
+          "id": "L02",
+          "pid": null,
+          "name": "有效账户列表",
+          "url": "/activeAccount",
+          "open": false,
+          "className": "firstA",
+          "isActive": false,
+          "iconLS": "/static/img/shape-5.png",
+          "nodes": []
+        },{
+          "id": "L03",
+          "pid": null,
+          "name": "修改客户主要元素",
+          "url": "/updateInfo",
+          "open": false,
+          "className": "firstA",
+          "isActive": false,
+          "iconLS": "/static/img/shape-7.png",
+          "nodes": []
+        },{
+          "id": "L04",
+          "pid": null,
+          "name": "账户注销",
+          "url": "/drawDown",
+          "open": false,
+          "className": "firstA",
+          "isActive": false,
+          "iconLS": "/static/img/shape-8.png",
+          "nodes": []
+        },{
+          "id": "L05",
+          "pid": null,
+          "name": "账户冻结/解冻",
+          "url": "/freezeOrDefrost",
+          "open": false,
+          "className": "firstA",
+          "isActive": false,
+          "iconLS": "/static/img/shape-9.png",
+          "nodes": []
+        },
+        {
+          "id": "L06",
+          "pid": null,
+          "name": "接入系统管理",
+          "url": "/systemManage",
+          "open": false,
+          "className": "firstA",
+          "isActive": false,
+          "iconLS": "/static/img/shape-2.png",
+        
+          "nodes": []
+        },{
+          "id": "L07",
+          "pid": null,
+          "name": "接口信息管理",
+          "url": "/interfaceManage",
+          "open": false,
+          "className": "firstA",
+          "isActive": false,
+          "iconLS": "/static/img/shape-3.png",
+          
+          "nodes": []
+        }
+      ]
+    }
+    
+  }

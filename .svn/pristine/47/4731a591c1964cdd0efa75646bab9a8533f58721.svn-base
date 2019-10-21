@@ -1,0 +1,332 @@
+<template>
+  <div class="loginBg">
+    <div class="login">
+      <p class="loginInstr">用户登录<span>|</span>User Login</p>
+      <Form
+        ref="formInline"
+        :model="formValidate"
+        :rules="ruleValidate"
+        inline
+      >
+        <FormItem prop="userCode">
+          <img
+            src="/static/img/userCode.png"
+            class="imgTip"
+          >
+          <Input
+            type="text"
+            class="inputStyle"
+            v-model="formValidate.userCode"
+            placeholder="请输入用户名"
+          />
+        </FormItem>
+        <FormItem prop="passWord">
+          <img
+            src="/static/img/passWord.png"
+            class="imgTip"
+          >
+          <Input
+            type="password"
+            class="inputStyle"
+            v-model="formValidate.passWord"
+            placeholder="请输入密码"
+          />
+
+        </FormItem>
+        <FormItem prop="code">
+          <img
+            src="/static/img/confirm.png"
+            class="imgTip"
+          >
+          <Input
+            type="text"
+            class="confirmStyle inputStyle"
+            v-model="formValidate.code"
+            placeholder="验证码"
+          />
+          <img
+            id="authImg"
+            class="authImg"
+            alt="看不清楚，点击获得新图片"
+            @click="authpic(this)"
+          />
+          <a
+            class="imgPic"
+            @click="authpic"
+          >看不清<br>换一张</a>
+        </FormItem>
+        <FormItem class="tipError">
+          <label style="color:red;">{{msgError}}</label>
+        </FormItem>
+        <FormItem>
+          <Button
+            type="primary"
+            @click="login('formInline')"
+          >登录</Button>
+        </FormItem>
+      </Form>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  name: "Login",
+  components: {
+    
+  },
+  data() {
+    return {
+      msgError: "",
+      formValidate: {
+        userCode: "",
+        passWord: "",
+        code: ""
+      },
+      url : "/logHom/api/login",
+      ruleValidate: {
+        userCode: [
+          { required: true, message: "请输入用户名", trigger: "blur" }
+        ],
+        passWord: [{ required: true, message: "请输入密码", trigger: "blur" }], 
+        code: [{ required: true, message: "请输入验证码", trigger: "blur" }]
+      }
+    };
+  },
+  created() {
+    
+  },
+  mounted() {
+    this.authpic();
+  },
+  methods: {
+    login(name) {
+      let that = this;
+      this.$refs[name].validate(valid => {
+        if (valid) {
+          //请求后台数据
+          that.axios
+            .post(this.url, this.formValidate) 
+            .then(res => {
+              if (res.data.status == "success") {
+                 let menuData = that.menuFun(
+                  res.data.result.menu
+                );
+                //后台返回的数据存放起来
+                let basicInfo = {
+                  userInfo: res.data.result.userInfo,
+                  menu: res.data.result.menu
+                };
+                localStorage.setItem("basicInfo", JSON.stringify(basicInfo));
+                 //跳转到首页
+                this.$router.push({ path: "/home" });
+              } else {
+                that.msgError = res.data.message;
+                that.authpic();
+              }
+            })
+            .catch(error => {});
+        }
+      });
+    },
+    menuFun(menuData) {
+      //菜单数据处理
+      let that = this,
+      data = [];
+      menuData.forEach(function(value, key) {
+        if (!value.upperCode) {
+          //有下一级菜单
+          let temp = menuData.filter(function(item) {
+            return item.upperCode === value.code;
+          });
+
+          let nodes = [];
+          //一级菜单左侧图标
+          let FirsIcon = {
+            L01: function() {
+              return {
+                imgName: "shape-1"
+              };
+            },
+            L02: function() {
+              return {
+                imgName: "shape-5"
+              };
+            },
+            L03: function() {
+              return {
+                imgName: "shape-7"
+              };
+            },
+            L04: function() {
+              return {
+                imgName: "shape-8"
+              };
+            },
+            L05: function() {
+              return {
+                imgName: "shape-9"
+              };
+            },
+            L06: function() {
+              return {
+                imgName: "shape-2"
+              };
+            },
+            L07: function() {
+              return {
+                imgName: "shape-3"
+              };
+            }
+          };
+          temp.forEach(function(i, j) {
+            if (i.isLeaf == "false") {
+              i.nodes = that.menuNext(i, menuData);
+            }
+            nodes.push({
+              id: i.code,
+              pid: i.upperCode,
+              name: i.name,
+              url: i.url,
+              open: false,
+              nodes: i.nodes,
+              isThree: i.nodes && i.nodes.length > 0 ? true : false,
+              isActive: false,
+              icon: i.nodes && i.nodes.length > 0 ? "md-add" : ""
+            });
+          });
+          data.push({
+            id: value.code,
+            pid: null,
+            name: value.name,
+            url: value.url,
+            open: false,
+            className: "firstA",
+            isActive: false,
+            iconLS: "/static/img/" + FirsIcon[value.code]().imgName + ".png",
+            iconLH: "/static/img/" + FirsIcon[value.code]().imgName + "-2.png",
+            nodes: nodes
+          });
+        }
+      });
+      return {
+        menu: data
+      };
+    },
+    menuNext(i, menuData) {
+      let that=this;
+      let tempNextT = menuData.filter(function(item) {
+        return item.upperCode === i.code;
+      });
+      let nodesNextT = [];
+      tempNextT.forEach(function(p, q) {
+        if (p.isLeaf == "false") {
+          p.nodes = that.menuNext(p, menuData);
+        }
+        nodesNextT.push({
+          id: p.code,
+          pid: p.upperCode,
+          name: p.name,
+          url: p.url,
+          open: false,
+          nodes: p.nodes,
+          isThree: p.nodes && p.nodes.length > 0 ? true : false,
+          isActive: false,
+          icon: p.nodes && p.nodes.length > 0 ? "md-add" : ""
+        });
+      });
+      return nodesNextT;
+    },
+    authpic() {
+      //数字字母验证码初始化js
+      let time = new Date().getTime();
+      document.getElementById("authImg").src = "/logHom/api/getCheck/?time=" + time; //防止缓存
+    }
+  }
+};
+</script>
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style lang="scss" scoped>
+//定义一个半透明颜色mixin
+@mixin semi-transparent-colors($color, $background) {
+  $percent: alpha($color) * 100%; //获取颜色透明度值，并转换成百分比
+  $opaque: opacify($color, 1); //使颜色不透明
+  $solid-color: mix($opaque, $background, $percent);
+  background-color: $solid-color; //设置不透明的颜色，为不支持rgba颜色的浏览器服务
+  background-color: $color; //设置透明颜色，为支持rgba颜色的浏览器服务
+}
+.loginBg {
+  background: url("/static/img/loginbg.jpg") no-repeat;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+.login {
+  width: 21%;
+  margin-right: 10%;
+  float: right;
+  margin-top: 17%;
+  margin-right: 35%;
+  padding: 1.5% 2.5%;
+
+  .loginInstr {
+    line-height: 32px;
+    color: rgb(14, 13, 13);
+    span {
+      padding: 0 5px;
+    }
+  }
+}
+
+.ivu-form-inline {
+  .ivu-form-item {
+    width: 100%;
+    .ivu-btn-primary {
+      width: 100%;
+    }
+  }
+}
+.inputStyle .ivu-input {
+  padding-left: 25px !important;
+   color: rgb(10, 0, 0);
+}
+.ivu-btn.ivu-btn-primary {
+  background-color: #eb441a;
+  border-color: #eb441a;
+}
+.tipError.ivu-form-item {
+  margin-bottom: 0px;
+}
+.confirmStyle {
+  width: 45%;
+}
+.imgPic {
+  vertical-align: bottom;
+  color: #333;
+  font-size: 12px;
+  width: 40px;
+  position: absolute;
+  line-height: 16px;
+  color: #fff;
+}
+.authImg {
+  vertical-align: bottom;
+  width: 60px;
+  height: 32px;
+
+  margin-left: 8px;
+  margin-right: 8px;
+}
+.imgTip {
+  position: absolute;
+  z-index: 10;
+  padding: 6px;
+  width: 25px;
+  top: 3px;
+}
+@media screen and (max-width: 1728px) {
+  .loginBg {
+    background-position-x: -150px;
+    background-position-y: -100px;
+  }
+}
+</style>
